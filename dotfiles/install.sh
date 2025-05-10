@@ -143,19 +143,19 @@ install_packages() {
   log "Installing packages..."
 
   while read -r package; do
-  if [ -n "$package" ]; then
-    log "Installing $package..."
-    
-    (sudo apt install -y "$package" &> /dev/null) &
-    
-    spinner $!
-    
-    if [ $? -eq 0 ]; then
-      success "$package installed"
-    else
-      fail "Failed to install $package"
+    if [ -n "$package" ]; then
+      log "Installing $package..."
+      
+      (sudo apt install -y "$package" &> /dev/null) &
+      
+      spinner $!
+      
+      if [ $? -eq 0 ]; then
+        success "$package installed"
+      else
+        fail "Failed to install $package"
+      fi
     fi
-  fi
   done < packages.txt
 
   echo -e "🔸 Installing dependencies for codium editor"
