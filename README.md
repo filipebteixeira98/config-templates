@@ -2,10 +2,6 @@
 
 Install your Linux dev environment with **one command**, including dotfiles, essential tools, and configs.
 
-```bash
-git clone https://github.com/YOUR_USERNAME/dotfiles.git && cd dotfiles && ./install.sh
-```
-
 # How to use
 
 ### Cloning repository
