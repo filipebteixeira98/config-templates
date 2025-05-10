@@ -193,13 +193,22 @@ install_packages() {
   sleep 0.75
 
   if command -v codium; then
+    echo -e "🔸 Installing codium editor"
+
+    wget -qO - https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg \
+      | gpg --dearmor \
+      | sudo dd of=/usr/share/keyrings/vscodium-archive-keyring.gpg
+    
+    echo 'deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/vscodium-archive-keyring.gpg] https://download.vscodium.com/debs vscodium main' \
+    | sudo tee /etc/apt/sources.list.d/vscodium.list
+    
+    sudo apt update && sudo apt install codium
+    
     # codium --list-extensions | xargs -L 1 echo codium --install-extension
     $extensions | xargs -L 1 echo codium --install-extension
-  else
-    $extensions | xargs -L 1 echo code --install-extension
   fi
 
-  echo "✅ Installed code editor extensions"
+  echo "✅ Installed code editor and extensions"
 
   echo -e "🔸 Installing node.js 💚 runtime through nvm manager"
 
