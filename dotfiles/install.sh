@@ -5,6 +5,8 @@ set -e  # Exit on error
 set -u  # Exit on unset variables
 set -o pipefail  # Catch errors in pipes
 
+trap 'fail "An error occurred. Exiting..."' ERR # trap function to clean up on failure
+
 # =============== ✨ CONFIG ✨ ===============
 DOTFILES_DIR="$(pwd)/configs"
 PACKAGE_LIST="packages.txt"
@@ -108,10 +110,19 @@ EOF
   exit 0
 }
 
+die() {
+  local code=${2-1}
+ 
+  exit "$code"
+}
+
 configure_environment() {
   loader=''
   message=''
   ending=''
+  minimal=false
+  with_dotfiles=false
+  dev_tools=false
   
   while :; do
     case "${1-}" in
@@ -127,6 +138,15 @@ configure_environment() {
       -e | --ending)
         ending="${2-}"
         shift
+        ;;
+      -s | --minimal)
+        minimal=true
+        ;;
+      -w | --with-dotfiles)
+        with_dotfiles=true
+        ;;
+      -t | --dev-tools)
+        dev_tools=true
         ;;
       -?*) die "Unknown option: $1" ;;
       *) break ;;
@@ -186,7 +206,7 @@ install_packages() {
         fail "Failed to install $package"
       fi
     fi
-  done < packages.txt
+  done < $PACKAGE_LIST
 
   echo -e "🔸 Installing dependencies for codium editor"
 
@@ -235,12 +255,12 @@ link_dotfiles() {
   
   for file in $(ls configs); do
     target="$HOME/.$file"
-    source_file="$(pwd)/configs/$file"
+    source_file="$DOTFILES_DIR/$file"
 
     if [ -e "$target" ]; then
-      log "Backing up $target to $target.bak"
+      log "Backing up $target to $target$BACKUP_SUFFIX"
       
-      mv "$target" "$target.bak"
+      mv "$target" "$target$BACKUP_SUFFIX"
     fi
 
     ln -s "$source_file" "$target"
