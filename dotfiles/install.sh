@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# =============== 🐚 SPINNER ===============
-# wget https://raw.githubusercontent.com/Silejonu/bash_loading_animations/main/bash_loading_animations.sh
-# source $HOME/bash_loading_animations.sh
-# trap BLA::stop_loading_animation SIGINT
-
 # set -euo pipefail
 set -e  # Exit on error
 set -u  # Exit on unset variables
