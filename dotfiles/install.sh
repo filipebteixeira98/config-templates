@@ -126,31 +126,18 @@ configure_environment() {
   
   while :; do
     case "${1-}" in
-      -h | --help) handle_usage_instructions;;
-      -l | --loader)
-        loader="${2-}"
-        shift
-        ;;
-      -m | --message)
-        message="${2-}"
-        shift
-        ;;
-      -e | --ending)
-        ending="${2-}"
-        shift
-        ;;
+      -h | --help) usage_instructions;;
       -s | --minimal)
         minimal=true
-        ;;
-      -w | --with-dotfiles)
-        with_dotfiles=true
+        shift
         ;;
       -t | --dev-tools)
         dev_tools=true
+        shift
         ;;
       -?*) die "Unknown option: $1" ;;
       *) break ;;
-      esac
+    esac
     shift
   done
 }
@@ -247,6 +234,53 @@ install_packages() {
   npm install --global yarn
 
   echo "✅ Installed yarn on version $(yarn -v)"
+
+  echo -e "🔸 Installing docker container application"
+
+  if pgrep -x gnome-session > /dev/null && $XDG_SESSION_DESKTOP === 'GNOME'; then
+    log "Desktop environment is GNOME. Configuring necessary dependencies..."
+
+    sudo apt install gnome-terminal
+  fi
+
+  # Add Docker's official GPG key:
+  sudo apt-get update
+  
+  sudo apt-get install ca-certificates curl
+  
+  sudo install -m 0755 -d /etc/apt/keyrings
+  
+  sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+  
+  sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+  # Add the repository to Apt sources:
+  echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+    $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  
+  sudo apt-get update
+  
+  sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+  sudo groupadd docker
+
+  sudo usermod -aG docker $USER
+
+  newgrp docker
+
+  sudo chown "$USER":"$USER" /home/"$USER"/.docker -R
+
+  sudo chmod g+rwx "$HOME/.docker" -R
+
+  sudo docker run hello-world
+  
+  sudo systemctl enable docker.service
+  
+  sudo systemctl enable containerd.service
+
+  echo "✅ Installed docker on version $(docker version)"
 }
 
 # =============== 🔗 SYMLINK DOTFILES ===============
@@ -276,7 +310,9 @@ main() {
     log "🔥 Starting environment setup..."
     
     check_requirements
+    
     install_packages
+    
     link_dotfiles
 
     success "🎉 Environment setup complete!"
