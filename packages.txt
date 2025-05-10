@@ -1,0 +1,14 @@
+# Basic development tools
+git
+curl
+wget
+zsh
+neovim
+tmux
+htop
+
+# Optional productivity apps
+ripgrep
+fd-find
+bat
+exa
