@@ -91,13 +91,48 @@ readonly extensions
 # =============== 🗺️ INSTRUCTIONS FUNCTION ===============
 usage_instructions() {
   cat <<EOF
+Usage: ./install.sh [options]
+
 Available options:
--h, --help            <OPTIONAL>    Print this help and exit
--l, --loader          <OPTIONAL>    Chose loader to display
--m, --message         <OPTIONAL>    Text to display while loading
--e, --ending          <OPTIONAL>    Text to display when finishing
+-h, --help              Show this help message and exit
+-l, --loader [type]     Set loader type (dots, spin, etc.)
+-m, --message [text]    Message to display during loading
+-e, --ending [text]     Message to display after finishing
+-s, --minimal           Install only essential tools
+-w, --with-dotfiles     Clone and apply dotfiles configuration
+-t, --dev-tools         Install developer tools (Node, Docker, etc.)
+-x, --desktop-tools     Install desktop GUI tools
+-f, --force             Skip prompts and force install
+    --debug             Enable debug output
 EOF
   exit 0
+}
+
+configure_environment() {
+  loader=''
+  message=''
+  ending=''
+  
+  while :; do
+    case "${1-}" in
+      -h | --help) handle_usage_instructions;;
+      -l | --loader)
+        loader="${2-}"
+        shift
+        ;;
+      -m | --message)
+        message="${2-}"
+        shift
+        ;;
+      -e | --ending)
+        ending="${2-}"
+        shift
+        ;;
+      -?*) die "Unknown option: $1" ;;
+      *) break ;;
+      esac
+    shift
+  done
 }
 
 # =============== 🌀 LOADING SPINNER ===============
@@ -207,8 +242,10 @@ link_dotfiles() {
 
 # =============== 🚀 MAIN ===============
 main() {
-    log "🔥 Starting environment setup..."
+    configure_environment "$@"
 
+    log "🔥 Starting environment setup..."
+    
     check_requirements
     install_packages
     link_dotfiles
@@ -217,30 +254,3 @@ main() {
 }
 
 main "$@"
-
-configure_environment() {
-  loader=''
-  message=''
-  ending=''
-  
-  while :; do
-    case "${1-}" in
-    -h | --help) handle_usage_instructions;;
-    -l | --loader)
-      loader="${2-}"
-      shift
-      ;;
-    -m | --message)
-      message="${2-}"
-      shift
-      ;;
-    -e | --ending)
-      ending="${2-}"
-      shift
-      ;;
-    -?*) die "Unknown option: $1" ;;
-    *) break ;;
-    esac
-    shift
-  done
-}
