@@ -302,13 +302,13 @@ main() {
     
     install_packages
 
-    if [ "$dev_tools" = true ]; then
+    if [ -z $1 ] && [ $1=='-w' ] || [ $1=='--with-dotfiles' ]; then
       log "🧰 Installing dev tools..."
 
       install_dev_tools  
     fi
 
-    if [ "$with_dotfiles" = true ]; then
+    if [ -z $2 ] && [ $2=='t'] || [ $2=='--dev-tools' ]; then
       log "🛠️ Cloning dotfiles..."
 
       link_dotfiles
