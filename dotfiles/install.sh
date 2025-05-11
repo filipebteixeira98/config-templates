@@ -97,15 +97,8 @@ Usage: ./install.sh [options]
 
 Available options:
 -h, --help              Show this help message and exit
--l, --loader [type]     Set loader type (dots, spin, etc.)
--m, --message [text]    Message to display during loading
--e, --ending [text]     Message to display after finishing
--s, --minimal           Install only essential tools
 -w, --with-dotfiles     Clone and apply dotfiles configuration
 -t, --dev-tools         Install developer tools (Node, Docker, etc.)
--x, --desktop-tools     Install desktop GUI tools
--f, --force             Skip prompts and force install
-    --debug             Enable debug output
 EOF
   exit 0
 }
@@ -117,24 +110,12 @@ die() {
 }
 
 configure_environment() {
-  loader=''
-  message=''
-  ending=''
-  minimal=false
   with_dotfiles=false
   dev_tools=false
   
   while :; do
     case "${1-}" in
       -h | --help) usage_instructions;;
-      -s | --minimal)
-        minimal=true
-        shift
-        ;;
-      -t | --dev-tools)
-        dev_tools=true
-        shift
-        ;;
       -?*) die "Unknown option: $1" ;;
       *) break ;;
     esac
@@ -179,6 +160,12 @@ check_requirements() {
 install_packages() {
   log "Installing packages..."
 
+  if [ ! -f "$PACKAGE_LIST" ]; then
+    fail "❌ Package list '$PACKAGE_LIST' not found."
+
+    exit 1
+  fi
+
   while read -r package; do
     if [ -n "$package" ]; then
       log "Installing $package..."
@@ -194,7 +181,9 @@ install_packages() {
       fi
     fi
   done < $PACKAGE_LIST
+}
 
+install_dev_tools() {
   echo -e "🔸 Installing dependencies for codium editor"
 
   sleep 0.75
@@ -312,9 +301,19 @@ main() {
     check_requirements
     
     install_packages
-    
-    link_dotfiles
 
+    if [ "$dev_tools" = true ]; then
+      log "🧰 Installing dev tools..."
+
+      install_dev_tools  
+    fi
+
+    if [ "$with_dotfiles" = true ]; then
+      log "🛠️ Cloning dotfiles..."
+
+      link_dotfiles
+    fi
+    
     success "🎉 Environment setup complete!"
 }
 
