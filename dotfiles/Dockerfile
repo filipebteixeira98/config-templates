@@ -14,7 +14,6 @@ WORKDIR /home/dev
 
 COPY install.sh .
 COPY packages.txt .
-COPY packages-minimal.txt .
 
 RUN chmod +x ./install.sh
 
