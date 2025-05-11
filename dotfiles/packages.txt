@@ -2,6 +2,7 @@ git
 curl
 wget
 zsh
+vim
 neovim
 tmux
 htop
