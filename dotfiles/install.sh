@@ -233,9 +233,9 @@ install_dev_tools() {
   fi
 
   # Add Docker's official GPG key:
-  sudo apt-get update
+  sudo apt update
   
-  sudo apt-get install ca-certificates curl
+  sudo apt install ca-certificates curl
   
   sudo install -m 0755 -d /etc/apt/keyrings
   
@@ -249,9 +249,9 @@ install_dev_tools() {
     $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
     sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
   
-  sudo apt-get update
+  sudo apt update
   
-  sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
   sudo groupadd docker
 
@@ -270,6 +270,34 @@ install_dev_tools() {
   sudo systemctl enable containerd.service
 
   echo "✅ Installed docker on version $(docker version)"
+
+  echo -e "🔸 Installing snapd package manager"
+
+  sudo apt install snapd
+
+  echo "✅ Installed snapd on version $(snap version)"
+
+  echo -e "🔸 Installing httpie api client"
+
+  snap install httpie
+
+  echo "✅ Installed httpie on version $(httpie --version)"
+  
+  echo -e "🔸 Installing Hoppscotch http client"
+
+  wget https://github.com/hoppscotch/releases/releases/latest/download/Hoppscotch_linux_x64.deb
+
+  sudo apt install ./Hoppscotch_linux_x64.deb
+
+  rm -rf Hoppscotch_linux_x64.deb
+
+  echo "✅ Installed Hoppscotch"
+  
+  echo -e "🔸 Installing DBeaver database"
+
+  sudo snap install dbeaver-ce
+
+  echo "✅ Installed DBeaver"
 }
 
 # =============== 🔗 SYMLINK DOTFILES ===============
