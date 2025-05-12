@@ -12,10 +12,12 @@ RUN useradd -ms /bin/bash dev && echo "dev ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoe
 USER dev
 WORKDIR /home/dev
 
-COPY install.sh .
-COPY packages.txt .
+# Copy files *after* switching user (important for permissions)
+COPY --chown=dev:dev install.sh .
+COPY --chown=dev:dev packages.txt .
 
-RUN chmod +x ./install.sh
+# Ensure the script is executable
+RUN chmod +x install.sh
 
-ENTRYPOINT ["./install.sh", "--with-dotfiles", "--dev-tools"]
-
+# ENTRYPOINT ["./install.sh", "--with-dotfiles", "--dev-tools"]
+ENTRYPOINT ["/bin/bash", "-c", "echo '🚀 Starting script...'; ./install.sh --with-dotfiles, --dev-tools]
