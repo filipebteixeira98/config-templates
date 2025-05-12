@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# set -euo pipefail
-set -e  # Exit on error
-set -u  # Exit on unset variables
-set -o pipefail  # Catch errors in pipes
+set -euo pipefail
+# set -e  # Exit on error
+# set -u  # Exit on unset variables
+# set -o pipefail  # Catch errors in pipes
 
 trap 'fail "An error occurred. Exiting..."' ERR # trap function to clean up on failure
 
@@ -302,13 +302,13 @@ main() {
     
     install_packages
 
-    if [ -z $1 ] && [ $1=='-w' ] || [ $1=='--with-dotfiles' ]; then
+    if [ $1=='-w' ] || [ $1=='--with-dotfiles' ]; then
       log "🧰 Installing dev tools..."
 
       install_dev_tools  
     fi
 
-    if [ -z $2 ] && [ $2=='t'] || [ $2=='--dev-tools' ]; then
+    if [ $2=='t'] || [ $2=='--dev-tools' ]; then
       log "🛠️ Cloning dotfiles..."
 
       link_dotfiles
