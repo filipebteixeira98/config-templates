@@ -104,20 +104,22 @@ EOF
 }
 
 die() {
+  local msg=$1
   local code=${2-1}
- 
+  fail "$msg"
   exit "$code"
 }
 
 configure_environment() {
   with_dotfiles=false
   dev_tools=false
-  
-  while :; do
-    case "${1-}" in
-      -h | --help) usage_instructions;;
-      -?*) die "Unknown option: $1" ;;
-      *) break ;;
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -h|--help) usage_instructions ;;
+      -w|--with-dotfiles) with_dotfiles=true ;;
+      -t|--dev-tools) dev_tools=true ;;
+      *) die "Unknown option: $1" ;;
     esac
     shift
   done
@@ -170,7 +172,7 @@ install_packages() {
     if [ -n "$package" ]; then
       log "Installing $package..."
       
-      (sudo apt install -y "$package" &> /dev/null) &
+      sudo apt install -y "$package" &> /dev/null &
       
       spinner $!
       
@@ -201,7 +203,11 @@ install_dev_tools() {
     sudo apt update && sudo apt install codium
     
     # codium --list-extensions | xargs -L 1 echo codium --install-extension
-    $extensions | xargs -L 1 echo codium --install-extension
+    echo "$extensions" | xargs -L 1 echo codium --install-extension
+
+    #while read -r ext; do
+    #  codium --install-extension "$ext"
+    #done <<< "$extensions"
   fi
 
   echo "✅ Installed code editor and extensions"
@@ -212,7 +218,7 @@ install_dev_tools() {
 
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
 
-  \. "$HOME/.nvm/nvm.sh"
+  . "$HOME/.nvm/nvm.sh"
 
   nvm install 22
 
@@ -226,7 +232,7 @@ install_dev_tools() {
 
   echo -e "🔸 Installing docker container application"
 
-  if pgrep -x gnome-session > /dev/null && $XDG_SESSION_DESKTOP === 'GNOME'; then
+  if pgrep -x gnome-session > /dev/null && $XDG_SESSION_DESKTOP = 'GNOME'; then
     log "Desktop environment is GNOME. Configuring necessary dependencies..."
 
     sudo apt install gnome-terminal
@@ -330,16 +336,14 @@ main() {
     
     install_packages
 
-    if [ $1=='-w' ] || [ $1=='--with-dotfiles' ]; then
-      log "🧰 Installing dev tools..."
-
-      install_dev_tools  
+    if [ "$with_dotfiles" = true ]; then
+      log "🛠️ Linking dotfiles..."
+      link_dotfiles
     fi
 
-    if [ $2=='t'] || [ $2=='--dev-tools' ]; then
-      log "🛠️ Cloning dotfiles..."
-
-      link_dotfiles
+    if [ "$dev_tools" = true ]; then
+      log "🧰 Installing dev tools..."
+      install_dev_tools
     fi
     
     success "🎉 Environment setup complete!"
