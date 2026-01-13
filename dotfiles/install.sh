@@ -250,14 +250,30 @@ install_dev_tools() {
   sudo chmod a+r /etc/apt/keyrings/docker.asc
 
   # Add the repository to Apt sources:
-  echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-    $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
-    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-  
+  # echo \
+  #  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  #  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+  #  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+  sudo apt remove $(dpkg --get-selections docker.io docker-compose docker-compose-v2 docker-doc podman-docker containerd runc | cut -f1)
+
+  sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+    Types: deb
+    URIs: https://download.docker.com/linux/ubuntu
+    Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+    Components: stable
+    Signed-By: /etc/apt/keyrings/docker.asc
+  EOF
+
   sudo apt update
-  
+
   sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+  sudo systemctl status docker
+
+  sudo systemctl start docker
+
+  sudo docker run hello-world
 
   sudo groupadd docker
 
@@ -269,10 +285,10 @@ install_dev_tools() {
 
   sudo chmod g+rwx "$HOME/.docker" -R
 
-  sudo docker run hello-world
-  
+  docker run hello-world
+
   sudo systemctl enable docker.service
-  
+
   sudo systemctl enable containerd.service
 
   echo "✅ Installed docker on version $(docker version)"
